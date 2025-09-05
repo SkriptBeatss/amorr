@@ -1,14 +1,260 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mensagem Animada</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Para meu amor ❤️</title>
+  <style>
+    :root{
+      --bg-top: #0f0f1f;
+      --bg-bottom: #1a1a2e;
+      --heart-size-desktop: 120px;
+      --heart-size-mobile: 90px;
+      --hit-size-desktop: 160px; /* área de toque maior */
+      --hit-size-mobile: 120px;
+    }
+
+    html,body{height:100%;margin:0;}
+    body {
+      margin: 0;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      display: block;
+      background: linear-gradient(to top, var(--bg-bottom), var(--bg-top) 70%);
+      overflow: hidden;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    /* estrelas (não captura toques) */
+    body::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      width: 200%;
+      height: 200%;
+      background: transparent url('https://www.transparenttextures.com/patterns/stardust.png') repeat;
+      animation: moveStars 200s linear infinite;
+      opacity: 0.55;
+      z-index: 0;
+      pointer-events: none;
+    }
+    @keyframes moveStars { from{transform:translate(0,0)} to{transform:translate(-500px,-500px)} }
+
+    /* título neon */
+    .titulo {
+      position: absolute;
+      top: 14px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 28px;
+      color: red;
+      text-shadow:
+        0 0 8px red,
+        0 0 18px red,
+        0 0 32px crimson,
+        0 0 48px darkred;
+      z-index: 6;
+      pointer-events: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    /* área central (stage) */
+    .stage {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* botão que recebe o toque (hit area) */
+    .heart-btn {
+      position: absolute;
+      left: 50%;
+      top: 56%;
+      transform: translate(-50%, -50%);
+      width: var(--hit-size-desktop);
+      height: var(--hit-size-desktop);
+      border: none;
+      background: transparent;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2; /* abaixo dos popups (3) e título (6) */
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .heart-btn:focus { outline: 2px solid rgba(255,0,0,0.25); border-radius: 50%; }
+
+    /* forma do coração (visual) */
+    .heart-shape {
+      width: var(--heart-size-desktop);
+      height: var(--heart-size-desktop);
+      background: red;
+      transform: rotate(-45deg);
+      box-shadow: 0 0 18px red, 0 0 36px red;
+      position: relative;
+      display: block;
+      pointer-events: none; /* o botão recebe o toque */
+      border-radius: 6px;
+      animation: pulse 1.4s infinite;
+    }
+    .heart-shape::before,
+    .heart-shape::after {
+      content: "";
+      position: absolute;
+      width: var(--heart-size-desktop);
+      height: var(--heart-size-desktop);
+      background: red;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .heart-shape::before { top: calc(var(--heart-size-desktop) * -0.5); left: 0; }
+    .heart-shape::after  { left: calc(var(--heart-size-desktop) * 0.5); top: 0; }
+
+    @keyframes pulse {
+      0% { transform: rotate(-45deg) scale(1); }
+      50% { transform: rotate(-45deg) scale(1.07); }
+      100% { transform: rotate(-45deg) scale(1); }
+    }
+
+    /* popups */
+    .popup {
+      position: absolute;
+      background: rgba(255,255,255,0.95);
+      color: #000;
+      padding: 8px 14px;
+      border-radius: 10px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.45);
+      font-size: 16px;
+      opacity: 0;
+      transform-origin: center;
+      animation: fadeInOut 3s forwards;
+      z-index: 3;
+      max-width: 86%;
+      text-align: center;
+      word-break: break-word;
+    }
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateY(12px) scale(0.97); }
+      10% { opacity: 1; transform: translateY(0) scale(1); }
+      85% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-12px) scale(0.97); }
+    }
+
+    /* responsivo */
+    @media (max-width: 600px) {
+      .titulo { font-size: 20px; top: 10px; }
+      .heart-btn { width: var(--hit-size-mobile); height: var(--hit-size-mobile); top: 58%; }
+      .heart-shape { width: var(--heart-size-mobile); height: var(--heart-size-mobile); }
+      .heart-shape::before, .heart-shape::after { width: var(--heart-size-mobile); height: var(--heart-size-mobile); }
+      .popup { font-size: 14px; padding: 6px 12px; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Eu te amo, meu amor</h1>
-    </div>
+  <div class="titulo">Eu te amo, meu amor</div>
+
+  <div class="stage">
+    <button id="heartBtn" class="heart-btn" aria-label="Toque para receber uma mensagem de amor">
+      <span class="heart-shape" aria-hidden="true"></span>
+    </button>
+  </div>
+
+  <script>
+    (function () {
+      const frases = [
+        "Eu te amo ❤️",
+        "Obrigado por tudo 💕",
+        "Você é maravilhosa 🌹",
+        "Meu coração é seu 💖",
+        "Você é meu mundo 🌎",
+        "Com você, tudo faz sentido ✨",
+        "Você é meu sonho realizado 💘",
+        "Minha vida é mais bonita com você 🌸"
+      ];
+
+      const btn = document.getElementById('heartBtn');
+      const titulo = document.querySelector('.titulo');
+      let lastTrigger = 0;
+
+      function createPopup(text) {
+        const popup = document.createElement('div');
+        popup.className = 'popup';
+        popup.textContent = text;
+        popup.style.visibility = 'hidden';
+        document.body.appendChild(popup);
+
+        const margin = 10;
+        const pw = popup.offsetWidth;
+        const ph = popup.offsetHeight;
+        const titleHeight = (titulo ? titulo.offsetHeight + 8 : 48);
+
+        const maxX = Math.max(0, window.innerWidth - pw - margin);
+        const maxY = Math.max(0, window.innerHeight - ph - margin - titleHeight);
+
+        let x = Math.random() * maxX + margin;
+        let y = Math.random() * maxY + titleHeight + margin;
+
+        const btnRect = btn.getBoundingClientRect();
+        const overlapX = (x < btnRect.right && x + pw > btnRect.left);
+        const overlapY = (y < btnRect.bottom && y + ph > btnRect.top);
+        if (overlapX && overlapY) {
+          if (y - (ph + 20) > titleHeight + margin) {
+            y = Math.max(titleHeight + margin, btnRect.top - ph - 12);
+          } else {
+            x = Math.min(Math.max(margin, btnRect.right + 12), maxX);
+          }
+        }
+
+        x = Math.min(Math.max(margin, x), window.innerWidth - pw - margin);
+        y = Math.min(Math.max(titleHeight + margin, y), window.innerHeight - ph - margin);
+
+        popup.style.left = x + 'px';
+        popup.style.top  = y + 'px';
+        popup.style.visibility = '';
+        setTimeout(()=> popup.remove(), 3000);
+      }
+
+      function triggerEvent() {
+        const now = Date.now();
+        if (now - lastTrigger < 450) return;
+        lastTrigger = now;
+        const text = frases[Math.floor(Math.random()*frases.length)];
+        createPopup(text);
+        btn.animate([{ transform: 'translate(-50%, -50%) scale(1)' }, { transform: 'translate(-50%, -50%) scale(0.96)' }, { transform: 'translate(-50%, -50%) scale(1)' }], { duration: 260, easing: 'ease-out' });
+      }
+
+      if ('onpointerdown' in window) {
+        btn.addEventListener('pointerdown', triggerEvent);
+      } else {
+        btn.addEventListener('touchstart', triggerEvent, { passive: true });
+        btn.addEventListener('mousedown', triggerEvent);
+      }
+      btn.addEventListener('click', triggerEvent);
+      btn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+          e.preventDefault();
+          triggerEvent();
+        }
+      });
+
+      window.addEventListener('orientationchange', () => {
+        document.querySelectorAll('.popup').forEach(n => n.remove());
+        lastTrigger = 0;
+      });
+
+      let touchMoving = false;
+      document.addEventListener('touchmove', () => { touchMoving = true; }, { passive: true });
+      btn.addEventListener('touchend', () => { setTimeout(()=> touchMoving=false, 200); }, { passive: true });
+    })();
+  </script>
 </body>
 </html>
